@@ -1,10 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using repository_practice;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 // DI db connect
-//builder.Services.AddDbContext<>
+builder.Services.AddDbContext<NorthwindContext>(
+    options => options.UseSqlServer("name=ConnectionStrings:NorthwindConnection"));
 
 var app = builder.Build();
 
