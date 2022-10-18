@@ -3,7 +3,7 @@ using repository_practice.Models;
 
 namespace repository_practice.DAL.Repository
 {
-    public class OrderRepository : Repository<Order>, IOrderRepository
+    public class OrderRepository : GenericRepository<Order>, IOrderRepository
     {
         public OrderRepository(NorthwindContext context)
             : base(context)

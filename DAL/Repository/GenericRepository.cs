@@ -2,12 +2,12 @@
 
 namespace repository_practice.DAL
 {
-    public class Repository<T> : IRepository<T> where T : class
+    public class GenericRepository<T> : IRepository<T> where T : class
     {
         internal readonly NorthwindContext context;
         internal readonly DbSet<T> dbSet;
 
-        public Repository(NorthwindContext context)
+        public GenericRepository(NorthwindContext context)
         {
             this.context = context;
             this.dbSet = context.Set<T>();
@@ -15,7 +15,7 @@ namespace repository_practice.DAL
 
         public IEnumerable<T> Get()
         {
-            throw new NotImplementedException();
+            return dbSet.ToList();
         }
 
         public T GetByID(object id)
@@ -36,7 +36,8 @@ namespace repository_practice.DAL
 
         public void Delete(object id)
         {
-            Delete(GetByID(id));
+            var entity = dbSet.Find(id);
+            Delete(entity);
         }
 
         protected void Delete(T entity)
