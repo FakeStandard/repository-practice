@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using repository_practice;
+using repository_practice.DAL;
+using repository_practice.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,8 @@ builder.Services.AddControllersWithViews();
 // DI db connect
 builder.Services.AddDbContext<NorthwindContext>(
     options => options.UseSqlServer("name=ConnectionStrings:NorthwindConnection"));
+
+builder.Services.AddTransient<IRepository<Order>, GenericRepository<Order>>();
 
 var app = builder.Build();
 

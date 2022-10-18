@@ -6,41 +6,30 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using repository_practice;
+using repository_practice.DAL;
 using repository_practice.Models;
 
 namespace repository_practice.Controllers
 {
     public class OrdersController : Controller
     {
-        private readonly NorthwindContext _context;
+        private readonly IRepository<Order> _repository;
 
-        public OrdersController(NorthwindContext context)
+        public OrdersController(IRepository<Order> repository)
         {
-            _context = context;
+            _repository = repository;
         }
 
         // GET: Orders
         public async Task<IActionResult> Index()
         {
-              return View(await _context.Orders.ToListAsync());
+            return View(_repository.Get());
         }
 
         // GET: Orders/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Orders == null)
-            {
-                return NotFound();
-            }
-
-            var order = await _context.Orders
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return View(order);
+            return View(_repository.GetByID(id));
         }
 
         // GET: Orders/Create
@@ -56,29 +45,18 @@ namespace repository_practice.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,CustomerID,EmployeeID,OrderDate,RequiredDate,ShippedDate,Via,Freight,Name,Address,City,Region,PostalCode,Country")] Order order)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(order);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(order);
+            _repository.Insert(order);
+            _repository.Save();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Orders/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Orders == null)
-            {
-                return NotFound();
-            }
+            var order = _repository.GetByID(id);
 
-            var order = await _context.Orders.FindAsync(id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-            return View(order);
+            return order is null ? NotFound() : View(order);
         }
 
         // POST: Orders/Edit/5
@@ -88,50 +66,18 @@ namespace repository_practice.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,CustomerID,EmployeeID,OrderDate,RequiredDate,ShippedDate,Via,Freight,Name,Address,City,Region,PostalCode,Country")] Order order)
         {
-            if (id != order.ID)
-            {
-                return NotFound();
-            }
+            _repository.Update(order);
+            _repository.Save();
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(order);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!OrderExists(order.ID))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(order);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Orders/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Orders == null)
-            {
-                return NotFound();
-            }
+            var order = _repository.GetByID(id);
 
-            var order = await _context.Orders
-                .FirstOrDefaultAsync(m => m.ID == id);
-            if (order == null)
-            {
-                return NotFound();
-            }
-
-            return View(order);
+            return order is null ? NotFound() : View(order);
         }
 
         // POST: Orders/Delete/5
@@ -139,23 +85,14 @@ namespace repository_practice.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Orders == null)
-            {
-                return Problem("Entity set 'NorthwindContext.Orders'  is null.");
-            }
-            var order = await _context.Orders.FindAsync(id);
-            if (order != null)
-            {
-                _context.Orders.Remove(order);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+            var order = _repository.GetByID(id);
 
-        private bool OrderExists(int id)
-        {
-          return _context.Orders.Any(e => e.ID == id);
+            if (order is not null)
+                _repository.Delete(id);
+
+            _repository.Save();
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }
