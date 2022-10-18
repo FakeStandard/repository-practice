@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using repository_practice.Models;
+using repository_practice.ViewModels;
 using System.Diagnostics;
 
 namespace repository_practice.Controllers
